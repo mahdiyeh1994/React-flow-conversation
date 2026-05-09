@@ -1,7 +1,7 @@
-import React from "react";
-import { EdgeProps, getBezierPath } from "reactflow";
-import { motion } from "framer-motion";
-import { useWorkflowStore } from "../../store";
+import React from 'react'
+import { EdgeProps, getBezierPath } from 'reactflow'
+import { motion } from 'framer-motion'
+import { useWorkflowStore } from '../../store'
 
 export const AnimatedEdge: React.FC<EdgeProps> = ({
   id,
@@ -11,6 +11,7 @@ export const AnimatedEdge: React.FC<EdgeProps> = ({
   targetY,
   sourcePosition,
   targetPosition,
+  sourceHandle,
   data,
 }) => {
   const [edgePath] = getBezierPath({
@@ -20,11 +21,16 @@ export const AnimatedEdge: React.FC<EdgeProps> = ({
     targetX,
     targetY,
     targetPosition,
-  });
+  })
 
-  const activeEdges = useWorkflowStore((state) => state.activeEdges);
-  const isActive = activeEdges.includes(id);
-  const label = (data as any)?.label;
+  const activeEdges = useWorkflowStore((state) => state.activeEdges)
+  const isActive = activeEdges.includes(id)
+
+  // Determine if this is a true or false branch from sourceHandle
+  const isTrueBranch = sourceHandle === 'true'
+  const isFalseBranch = sourceHandle === 'false'
+  const isConditionEdge = isTrueBranch || isFalseBranch
+  const label = data?.label
 
   return (
     <g>
@@ -38,7 +44,7 @@ export const AnimatedEdge: React.FC<EdgeProps> = ({
           opacity={0.3}
           initial={{ opacity: 0.3 }}
           animate={{ opacity: 0.6 }}
-          transition={{ duration: 1, repeat: Infinity, repeatType: "reverse" }}
+          transition={{ duration: 1, repeat: Infinity, repeatType: 'reverse' }}
         />
       )}
 
@@ -49,68 +55,60 @@ export const AnimatedEdge: React.FC<EdgeProps> = ({
         strokeWidth={2}
         stroke={
           isActive
-            ? "#3b82f6"
-            : label === "true"
-              ? "#10b981"
-              : label === "false"
-                ? "#ef4444"
-                : "#cbd5e1"
+            ? isTrueBranch
+              ? '#10b981'
+              : isFalseBranch
+                ? '#ef4444'
+                : '#3b82f6'
+            : isTrueBranch
+              ? '#d1e7e6'
+              : isFalseBranch
+                ? '#ffe4e6'
+                : '#cbd5e1'
         }
-        strokeDasharray={label ? "5,5" : "0"}
+        strokeDasharray={isConditionEdge ? '5,5' : '0'}
         className="transition-all duration-300"
-        markerEnd={
-          isActive ? "url(#arrowblue)" : label ? "url(#arrow)" : undefined
-        }
+        markerEnd={isActive ? (isTrueBranch ? 'url(#arrowtrue)' : 'url(#arrowfalse)') : undefined}
         initial={{ pathLength: 0 }}
         animate={{
           pathLength: 1,
-          opacity: isActive ? 1 : 0.6,
-          strokeWidth: isActive ? 2.5 : 2,
+          opacity: isActive ? 1 : 0.5,
+          strokeWidth: isActive ? 3 : 2,
         }}
         transition={{ duration: 0.5 }}
       />
 
       {/* SVG markers for arrows */}
       <defs>
-        <marker
-          id="arrow"
-          markerWidth="20"
-          markerHeight="20"
-          refX="19"
-          refY="9"
-          orient="auto"
-        >
-          <polygon
-            points="0 0, 20 10, 0 20"
-            fill={label === "true" ? "#10b981" : "#ef4444"}
-          />
+        <marker id="arrowtrue" markerWidth="20" markerHeight="20" refX="19" refY="9" orient="auto">
+          <polygon points="0 0, 20 10, 0 20" fill="#10b981" />
         </marker>
-        <marker
-          id="arrowblue"
-          markerWidth="20"
-          markerHeight="20"
-          refX="19"
-          refY="9"
-          orient="auto"
-        >
+        <marker id="arrowfalse" markerWidth="20" markerHeight="20" refX="19" refY="9" orient="auto">
+          <polygon points="0 0, 20 10, 0 20" fill="#ef4444" />
+        </marker>
+        <marker id="arrow" markerWidth="20" markerHeight="20" refX="19" refY="9" orient="auto">
+          <polygon points="0 0, 20 10, 0 20" fill={label === 'true' ? '#10b981' : '#ef4444'} />
+        </marker>
+        <marker id="arrowblue" markerWidth="20" markerHeight="20" refX="19" refY="9" orient="auto">
           <polygon points="0 0, 20 10, 0 20" fill="#3b82f6" />
         </marker>
       </defs>
 
       {/* Edge label */}
-      {label && (
+      {isConditionEdge && (
         <motion.text
           x={(sourceX + targetX) / 2}
-          y={(sourceY + targetY) / 2 - 10}
+          y={(sourceY + targetY) / 2 - 15}
           textAnchor="middle"
-          className="select-none fill-slate-600 text-xs font-semibold"
+          className="select-none text-xs font-bold"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
+          fill={isTrueBranch ? '#059669' : '#dc2626'}
         >
-          {label}
+          {isTrueBranch ? '✓ TRUE' : '✕ FALSE'}
         </motion.text>
       )}
     </g>
-  );
-};
+  )
+}

@@ -1,27 +1,22 @@
-import React from "react";
-import { Handle, Position, NodeProps } from "reactflow";
-import { motion } from "framer-motion";
-import { GitBranch } from "lucide-react";
-import { useWorkflowStore } from "../../store";
-import { ConditionNodeData } from "../../types";
+import React from 'react'
+import { Handle, Position, NodeProps } from 'reactflow'
+import { motion } from 'framer-motion'
+import { GitBranch } from 'lucide-react'
+import { useWorkflowStore } from '../../store'
+import { ConditionNodeData } from '../../types'
 
-export const ConditionNode: React.FC<NodeProps<ConditionNodeData>> = ({
-  id,
-  data,
-  isConnectable,
-  selected,
-}) => {
-  const setSelectedNode = useWorkflowStore((state) => state.setSelectedNode);
+export const ConditionNode: React.FC<NodeProps<ConditionNodeData>> = ({ id, data, isConnectable, selected }) => {
+  const setSelectedNode = useWorkflowStore((state) => state.setSelectedNode)
 
   const getOperatorSymbol = (operator: string) => {
     const symbols: Record<string, string> = {
-      ">": ">",
-      "<": "<",
-      "==": "=",
-      "!=": "≠",
-    };
-    return symbols[operator] || operator;
-  };
+      '>': '>',
+      '<': '<',
+      '==': '=',
+      '!=': '≠',
+    }
+    return symbols[operator] || operator
+  }
 
   return (
     <motion.div
@@ -29,7 +24,7 @@ export const ConditionNode: React.FC<NodeProps<ConditionNodeData>> = ({
       animate={{ scale: 1, opacity: 1, rotate: 0 }}
       whileHover={{
         scale: 1.08,
-        boxShadow: "0 0 15px rgba(139, 92, 246, 0.3)",
+        boxShadow: '0 0 15px rgba(139, 92, 246, 0.3)',
       }}
       transition={{ duration: 0.2 }}
       className={`
@@ -37,8 +32,8 @@ export const ConditionNode: React.FC<NodeProps<ConditionNodeData>> = ({
         relative backdrop-blur-sm
         ${
           selected
-            ? "border-purple-500 shadow-glow-active bg-purple-50"
-            : "border-purple-200 bg-gradient-to-br from-purple-50 to-white hover:shadow-medium hover:border-purple-300"
+            ? 'border-purple-500 shadow-glow-active bg-purple-50'
+            : 'border-purple-200 bg-gradient-to-br from-purple-50 to-white hover:shadow-medium hover:border-purple-300'
         }
       `}
       onClick={() => setSelectedNode(id)}
@@ -54,41 +49,57 @@ export const ConditionNode: React.FC<NodeProps<ConditionNodeData>> = ({
 
         <div className="bg-white/70 backdrop-blur-sm rounded-lg px-3 py-2 mb-2 border border-purple-200/50">
           <p className="text-xs font-mono text-purple-700">
-            value{" "}
-            <span className="font-bold">
-              {getOperatorSymbol(data.operator)}
-            </span>{" "}
-            {data.compareValue}
+            value <span className="font-bold">{getOperatorSymbol(data.operator)}</span> {data.compareValue}
           </p>
         </div>
 
         <div className="flex gap-2 text-xs font-semibold">
-          <span className="px-2 py-1 rounded bg-emerald-100 text-emerald-700">
-            TRUE
-          </span>
-          <span className="px-2 py-1 rounded bg-red-100 text-red-700">
-            FALSE
-          </span>
+          <span className="px-2 py-1 rounded bg-emerald-100 text-emerald-700">TRUE</span>
+          <span className="px-2 py-1 rounded bg-red-100 text-red-700">FALSE</span>
         </div>
       </div>
 
+      {/* Input handle */}
       <Handle
         type="target"
         position={Position.Top}
+        id="input"
         isConnectable={isConnectable}
+        style={{
+          background: '#8b5cf6',
+          width: '10px',
+          height: '10px',
+          zIndex: 10,
+        }}
       />
+
+      {/* True output handle - Bottom */}
       <Handle
         type="source"
         position={Position.Bottom}
-        label="true"
+        id="true"
         isConnectable={isConnectable}
+        style={{
+          background: '#10b981',
+          width: '10px',
+          height: '10px',
+          zIndex: 10,
+        }}
       />
+
+      {/* False output handle - Right */}
       <Handle
         type="source"
         position={Position.Right}
-        label="false"
+        id="false"
         isConnectable={isConnectable}
+        style={{
+          background: '#ef4444',
+          width: '10px',
+          height: '10px',
+          zIndex: 10,
+        }}
       />
     </motion.div>
-  );
-};
+  )
+}

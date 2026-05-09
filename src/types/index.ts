@@ -24,8 +24,8 @@ export interface ConditionNode extends Node<ConditionNodeData> {
 
 export type WorkflowNode = ConversationNode | ConditionNode | Node;
 
-export interface WorkflowEdge extends Edge {
-  animated?: boolean;
+export interface WorkflowEdge extends Edge {  sourceHandle?: string
+  targetHandle?: string  animated?: boolean;
   style?: React.CSSProperties;
   label?: string;
 }
