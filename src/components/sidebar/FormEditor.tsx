@@ -9,7 +9,6 @@ interface FormEditorProps {
 
 export const FormEditor: React.FC<FormEditorProps> = ({ node }) => {
   const updateNodeData = useWorkflowStore((state) => state.updateNodeData)
-  const evaluateConditions = useWorkflowStore((state) => state.evaluateConditions)
 
   const handleChange = useCallback(
     (key: string, value: any) => {

@@ -125,14 +125,22 @@ evaluateConditions() {
      d. Compare: value [operator] compareValue
      e. Store result (true/false)
   3. For each edge from condition:
-     a. If result is true AND edge.label === 'true':
+     a. If result is true AND edge.sourceHandle === 'true':
         → Mark edge as active
-     b. If result is false AND edge.label === 'false':
+     b. If result is false AND edge.sourceHandle === 'false':
         → Mark edge as active
   4. Update store.activeEdges
   5. UI components render with glow effect
 }
 ```
+
+### How It Works
+
+The key to identifying true/false branches is the **sourceHandle** property:
+
+- When user connects a Condition Node's "TRUE" handle (bottom) to another node, React Flow automatically sets `edge.sourceHandle = 'true'`
+- When user connects a Condition Node's "FALSE" handle (right) to another node, React Flow automatically sets `edge.sourceHandle = 'false'`
+- The `evaluateConditions()` function uses this sourceHandle to determine which edge should be active based on the condition result
 
 ### Example Evaluation
 
@@ -141,19 +149,20 @@ Input:
 - Conversation Node: value = "25"
 - Condition Node: operator = ">", compareValue = 18
 - Edges:
-  - true: from condition to node A
-  - false: from condition to node B
+  - Edge to node A: sourceHandle = 'true'
+  - Edge to node B: sourceHandle = 'false'
 
 Process:
 1. Read value: 25
 2. Evaluate: 25 > 18
 3. Result: TRUE
-4. Activate: edge to node A glows
-5. Deactivate: edge to node B dims
+4. For each edge from Condition Node:
+   - Edge A: sourceHandle === 'true' && result === true → ACTIVATE
+   - Edge B: sourceHandle === 'false' && result === false → SKIP
 
 Visual Feedback:
-- True edge: GREEN glow, pulsing animation
-- False edge: RED, dimmed appearance
+- True edge (A): GREEN glow, pulsing animation
+- False edge (B): RED, dimmed appearance
 ```
 
 ---
@@ -304,9 +313,10 @@ WorkflowCanvas (Parent)
   id: string,              // Unique identifier
   source: string,          // Source node ID
   target: string,          // Target node ID
+  sourceHandle?: string,   // Source handle ID ('true' or 'false' for conditions)
+  targetHandle?: string,   // Target handle ID
   type: 'animated',        // Edge type (custom)
   animated?: boolean,      // Should animate
-  label?: 'true' | 'false' // Condition branch label
 }
 ```
 
