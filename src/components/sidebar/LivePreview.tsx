@@ -36,7 +36,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ node, nodeData }) => {
             >
               <div className="max-w-xs bg-slate-200 text-slate-900 rounded-2xl rounded-bl-none px-4 py-2">
                 <p className="text-sm font-medium">
-                  {data.message || "(Enter your message)"}
+                 {data.label || "(Enter your message)"}
                 </p>
               </div>
             </motion.div>
@@ -49,7 +49,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ node, nodeData }) => {
               className="flex justify-end"
             >
               <div className="max-w-xs bg-blue-500 text-white rounded-2xl rounded-br-none px-4 py-2">
-                <p className="text-sm">Next message will continue flow...</p>
+                <p className="text-sm">{data.message || "Enter your message here"}</p>
               </div>
             </motion.div>
           </div>
@@ -61,10 +61,6 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ node, nodeData }) => {
             transition={{ delay: 0.3 }}
             className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200"
           >
-            <p className="text-xs text-blue-700">
-              <MessageCircle className="inline w-3 h-3 mr-1" />
-              <strong>Label:</strong> {data.label || "Untitled"}
-            </p>
             {data.text && (
               <p className="text-xs text-blue-700 mt-1">
                 <strong>Value:</strong>{" "}
