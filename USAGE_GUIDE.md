@@ -104,10 +104,11 @@ If incoming value ≤ 18 → FALSE path activates
 
 #### Closing the Sidebar
 
-- Click "Done" button
-- Click node again to deselect
-- Click backdrop/outside sidebar
-- Select different node
+- Click "Done" button → Sidebar closes, **node stays selected**
+- Click empty canvas → Sidebar closes AND node deselects
+- Select a different node → Sidebar updates to show new node's properties
+
+**Important**: Closing the sidebar does NOT deselect the node. The Delete button remains enabled until you explicitly deselect by clicking on empty canvas area.
 
 #### Content Sections
 

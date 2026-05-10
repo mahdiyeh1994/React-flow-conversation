@@ -144,12 +144,37 @@ interface WorkflowStore {
   nodes: WorkflowNode[] // All nodes in canvas
   edges: WorkflowEdge[] // All connections
   selectedNodeId: string | null // Currently selected node
-  sidebarOpen: boolean // Sidebar visibility
+  sidebarOpen: boolean // Sidebar visibility (independent)
   activeEdges: string[] // Edges with active condition paths
 }
 ```
 
+**Key Architecture**: `selectedNodeId` and `sidebarOpen` are **independent states**. Closing the sidebar does not deselect the node, and node selection can be managed separately from UI visibility.
+
 ### Available Actions
+
+#### Node Selection (Recommended)
+
+```typescript
+// Select a node and open sidebar (composite action)
+selectNode(nodeId: string)
+
+// Deselect node and close sidebar (composite action)
+deselectNode()
+
+// Get the currently selected node
+getSelectedNode(): WorkflowNode | undefined
+```
+
+#### Sidebar Management (Independent)
+
+```typescript
+// Open sidebar without affecting selection
+openSidebar()
+
+// Close sidebar without deselecting node
+closeSidebar()
+```
 
 #### Node Management
 
@@ -157,17 +182,11 @@ interface WorkflowStore {
 // Add a new node (conversation or condition)
 addNode(type: 'conversation' | 'condition', position: { x, y })
 
-// Remove a node and connected edges
+// Remove a node and connected edges (clears selection if deleted)
 removeNode(nodeId: string)
 
 // Update node data properties
 updateNodeData(nodeId, data)
-
-// Set which node is selected
-setSelectedNode(nodeId: string | null)
-
-// Get the currently selected node
-getSelectedNode(): WorkflowNode | undefined
 
 // Replace all nodes
 setNodes(nodes)
@@ -186,21 +205,24 @@ removeEdge(edgeId: string)
 setEdges(edges)
 ```
 
-#### UI Control
-
-```typescript
-// Show/hide sidebar
-setSidebarOpen(open: boolean)
-
-// Reset entire workflow
-reset()
-```
-
 #### Logic Evaluation
 
 ```typescript
 // Evaluate all conditions and update active edges
 evaluateConditions()
+
+// Reset entire workflow
+reset()
+```
+
+#### Legacy Functions (Backward Compatible)
+
+```typescript
+// Deprecated: Use selectNode() instead - changes selection only
+setSelectedNode(nodeId: string | null)
+
+// Deprecated: Use closeSidebar() instead - controls visibility only
+setSidebarOpen(open: boolean)
 ```
 
 ### Example Usage
@@ -211,15 +233,30 @@ import { useWorkflowStore } from '@/store'
 function MyComponent() {
   const addNode = useWorkflowStore(state => state.addNode)
   const selectedNode = useWorkflowStore(state => state.getSelectedNode())
+  const selectNode = useWorkflowStore(state => state.selectNode)
+  const closeSidebar = useWorkflowStore(state => state.closeSidebar)
 
   const handleAddMessage = () => {
     addNode('conversation', { x: 100, y: 100 })
   }
 
+  const handleSelectNode = (id: string) => {
+    selectNode(id)  // Selects node AND opens sidebar
+  }
+
+  const handleCloseSidebar = () => {
+    closeSidebar()  // Closes sidebar, keeps node selected
+  }
+
   return (
     <div>
       <button onClick={handleAddMessage}>Add Message</button>
-      {selectedNode && <p>Selected: {selectedNode.id}</p>}
+      {selectedNode && (
+        <>
+          <p>Selected: {selectedNode.id}</p>
+          <button onClick={handleCloseSidebar}>Close Editor</button>
+        </>
+      )}
     </div>
   )
 }

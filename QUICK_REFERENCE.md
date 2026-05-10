@@ -27,7 +27,8 @@ npm run dev
 | Pan Canvas         | Right-click + drag (or hold Space + drag) |
 | Zoom In/Out        | Mouse wheel up/down                       |
 | Delete Node        | Select node + click "Delete Selected"     |
-| Close Sidebar      | Click "Done" or click outside             |
+| Close Sidebar      | Click "Done" (node stays selected)        |
+| Deselect Node      | Click on empty canvas                     |
 | Reset Workflow     | Click "Reset All" (with confirmation)     |
 
 ---
@@ -138,33 +139,47 @@ Age Check ──────┤
 // Import
 import { useWorkflowStore } from '@/store'
 
-// Create nodes
+// CREATE - Add nodes
 const addNode = useWorkflowStore((state) => state.addNode)
 addNode('conversation', { x: 100, y: 100 })
 addNode('condition', { x: 100, y: 300 })
 
-// Edit nodes
+// READ - Get selected node
+const selectedNode = useWorkflowStore((state) => state.getSelectedNode())
+
+// UPDATE - Edit node properties
 const updateNodeData = useWorkflowStore((state) => state.updateNodeData)
 updateNodeData('node-id', { label: 'New Label' })
 
-// Manage selection
-const setSelectedNode = useWorkflowStore((state) => state.setSelectedNode)
-setSelectedNode('node-id')
+// SELECT - Manage node selection (recommended)
+const selectNode = useWorkflowStore((state) => state.selectNode)
+selectNode('node-id') // Selects node AND opens sidebar
 
-// Get selected
-const selectedNode = useWorkflowStore((state) => state.getSelectedNode())
+const deselectNode = useWorkflowStore((state) => state.deselectNode)
+deselectNode() // Deselects node AND closes sidebar
 
-// Edges
+// SIDEBAR - Manage sidebar independently
+const closeSidebar = useWorkflowStore((state) => state.closeSidebar)
+closeSidebar() // Closes sidebar, keeps node selected
+
+const openSidebar = useWorkflowStore((state) => state.openSidebar)
+openSidebar() // Opens sidebar without changing selection
+
+// EDGES - Manage connections
 const addEdge = useWorkflowStore((state) => state.addEdge)
 const removeEdge = useWorkflowStore((state) => state.removeEdge)
 
-// Evaluation
+// EVALUATE - Trigger condition logic
 const evaluateConditions = useWorkflowStore((state) => state.evaluateConditions)
 evaluateConditions()
 
-// Reset
+// RESET - Clear everything
 const reset = useWorkflowStore((state) => state.reset)
 reset()
+
+// LEGACY - For backward compatibility
+const setSelectedNode = useWorkflowStore((state) => state.setSelectedNode)
+const setSidebarOpen = useWorkflowStore((state) => state.setSidebarOpen)
 ```
 
 ---

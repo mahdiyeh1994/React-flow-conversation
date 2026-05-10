@@ -109,6 +109,38 @@ Framer Motion animates entrance
 Complete! Node visible and interactive
 ```
 
+### State Independence Architecture
+
+**Key Design**: `selectedNodeId` and `sidebarOpen` are **decoupled**:
+
+```typescript
+// These states are independent:
+selectedNodeId: string | null // Node selection state
+sidebarOpen: boolean // UI visibility state
+
+// Recommended composite actions:
+selectNode(id) // Sets both: selectedNodeId=id, sidebarOpen=true
+deselectNode() // Clears both: selectedNodeId=null, sidebarOpen=false
+
+// Independent sidebar actions:
+closeSidebar() // Only: sidebarOpen=false (selection persists)
+openSidebar() // Only: sidebarOpen=true (selection unchanged)
+```
+
+**Behavior Example**:
+
+```
+1. User clicks node
+   → selectNode(id) → selectedNodeId=id, sidebarOpen=true
+
+2. User closes sidebar by clicking "Done"
+   → closeSidebar() → sidebarOpen=false, selectedNodeId unchanged
+   → Node remains highlighted, can delete it
+
+3. User clicks empty canvas
+   → deselectNode() → selectedNodeId=null, sidebarOpen=false
+```
+
 ---
 
 ## 🔄 Condition Evaluation System
@@ -243,33 +275,54 @@ Visual Feedback:
 
 ```
 WorkflowCanvas (Parent)
-├── Listens: onNodesChange, onEdgesChange, onConnect
-├── Calls Store: setNodes, setEdges, addEdge, evaluateConditions
+├── Listens: onNodesChange, onEdgesChange, onConnect, onPaneClick
+├── Calls Store: selectNode, deselectNode, setNodes, setEdges, addEdge, evaluateConditions
 │
 ├─ ConversationNode (Child)
-│  └── Calls: setSelectedNode when clicked
-│  └── Reads: selectedNodeId to show glow
+│  └── Calls: selectNode(id) when clicked
+│  └── Reads: selectedNodeId to show highlight/glow
 │
 ├─ ConditionNode (Child)
-│  └── Calls: setSelectedNode when clicked
-│  └── Reads: activeEdges to show glow
+│  └── Calls: selectNode(id) when clicked
+│  └── Reads: selectedNodeId to show highlight/glow
+│  └── Reads: activeEdges to show active paths
 │
 ├─ AnimatedEdge (Child)
-│  └── Reads: activeEdges to animate
-│  └── Renders: Different colors based on label
+│  └── Reads: activeEdges to animate stroke
+│  └── Renders: Color based on label (true=green, false=red)
+│  └── Shows glow when edge is active
 │
 ├─ Toolbar (Sibling)
 │  └── Calls: addNode, removeNode, reset
-│  └── Reads: selectedNodeId for delete button state
+│  └── Reads: selectedNodeId for delete button enabled state
 │
 └─ Sidebar (Sibling)
    ├─ Reads: selectedNodeId, sidebarOpen
+   ├─ Calls: closeSidebar() on "Done" click
+   │
    ├─ FormEditor (Child)
    │  └── Calls: updateNodeData, evaluateConditions
+   │  └── Reads: selectedNode for form state
    │
    └─ LivePreview (Child)
-      └── Reads: selectedNode data for preview
+      └── Reads: selectedNode data for preview rendering
 ```
+
+**Selection Flow**:
+
+1. User clicks node on canvas
+2. React Flow's `onNodesChange` fires with `selected: true`
+3. `handleNodesChange` calls `selectNode(id)`
+4. Store sets: `selectedNodeId=id, sidebarOpen=true`
+5. Components re-subscribe and re-render
+
+**Deselection Flow**:
+
+1. User clicks empty canvas
+2. React Flow's `onPaneClick` fires
+3. `handlePaneClick` calls `deselectNode()`
+4. Store sets: `selectedNodeId=null, sidebarOpen=false`
+5. Components update UI (node glow disappears, sidebar closes)
 
 ---
 
