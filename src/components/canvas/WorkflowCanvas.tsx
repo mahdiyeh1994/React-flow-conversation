@@ -36,6 +36,8 @@ export const WorkflowCanvas: React.FC = () => {
   const addEdge_ = useWorkflowStore((state) => state.addEdge)
   const setNodes = useWorkflowStore((state) => state.setNodes)
   const setEdges = useWorkflowStore((state) => state.setEdges)
+  const selectNode = useWorkflowStore((state) => state.selectNode)
+  const deselectNode = useWorkflowStore((state) => state.deselectNode)
   const evaluateConditions = useWorkflowStore((state) => state.evaluateConditions)
 
   const [nodes, setNodesState, onNodesChange] = useNodesState(storeNodes)
@@ -60,6 +62,12 @@ export const WorkflowCanvas: React.FC = () => {
             return [...acc, { ...node, position: change.position }]
           }
           if (change.selected !== undefined) {
+            // When a node is selected, open sidebar and update selection
+            if (change.selected) {
+              selectNode(change.id)
+            } else {
+              deselectNode()
+            }
             return [...acc, { ...node, selected: change.selected }]
           }
         }
@@ -70,7 +78,7 @@ export const WorkflowCanvas: React.FC = () => {
         setNodes(updatedNodes.length > 0 ? updatedNodes : nodes)
       }
     },
-    [onNodesChange, nodes, setNodes]
+    [onNodesChange, nodes, setNodes, selectNode, deselectNode]
   )
 
   const handleEdgesChange = useCallback(
@@ -124,6 +132,11 @@ export const WorkflowCanvas: React.FC = () => {
     [addNode]
   )
 
+  // Handle canvas clicks to deselect nodes when clicking empty space
+  const handlePaneClick = useCallback(() => {
+    deselectNode()
+  }, [deselectNode])
+
   return (
     <div className="w-full h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <ReactFlow
@@ -132,6 +145,7 @@ export const WorkflowCanvas: React.FC = () => {
         onNodesChange={handleNodesChange}
         onEdgesChange={handleEdgesChange}
         onConnect={handleConnect}
+        onPaneClick={handlePaneClick}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView

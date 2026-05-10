@@ -6,7 +6,7 @@ import { useWorkflowStore } from '../../store'
 import { ConditionNodeData } from '../../types'
 
 export const ConditionNode: React.FC<NodeProps<ConditionNodeData>> = ({ id, data, isConnectable, selected }) => {
-  const setSelectedNode = useWorkflowStore((state) => state.setSelectedNode)
+  const selectNode = useWorkflowStore((state) => state.selectNode)
 
   const getOperatorSymbol = (operator: string) => {
     const symbols: Record<string, string> = {
@@ -36,7 +36,7 @@ export const ConditionNode: React.FC<NodeProps<ConditionNodeData>> = ({ id, data
             : 'border-purple-200 bg-gradient-to-br from-purple-50 to-white hover:shadow-medium hover:border-purple-300'
         }
       `}
-      onClick={() => setSelectedNode(id)}
+      onClick={() => selectNode(id)}
     >
       {/* Diamond-like background decoration */}
       <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-100/0 to-purple-100/20 pointer-events-none" />

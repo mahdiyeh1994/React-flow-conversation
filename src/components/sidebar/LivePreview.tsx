@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { MessageCircle, GitBranch } from "lucide-react";
+import {  GitBranch } from "lucide-react";
 import {
   WorkflowNode,
   ConversationNodeData,

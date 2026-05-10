@@ -1,21 +1,19 @@
-import React, { useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
-import { useWorkflowStore } from "../../store";
-import { FormEditor } from "./FormEditor";
-import { LivePreview } from "./LivePreview";
-import { ConversationNodeData, ConditionNodeData } from "../../types";
+import React, { useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { X } from 'lucide-react'
+import { useWorkflowStore } from '../../store'
+import { FormEditor } from './FormEditor'
+import { LivePreview } from './LivePreview'
+import { ConversationNodeData, ConditionNodeData } from '../../types'
 
 export const Sidebar: React.FC = () => {
-  const selectedNode = useWorkflowStore((state) => state.getSelectedNode());
-  const sidebarOpen = useWorkflowStore((state) => state.sidebarOpen);
-  const setSidebarOpen = useWorkflowStore((state) => state.setSidebarOpen);
-  const setSelectedNode = useWorkflowStore((state) => state.setSelectedNode);
+  const selectedNode = useWorkflowStore((state) => state.getSelectedNode())
+  const sidebarOpen = useWorkflowStore((state) => state.sidebarOpen)
+  const closeSidebar = useWorkflowStore((state) => state.closeSidebar)
 
   const handleClose = useCallback(() => {
-    setSidebarOpen(false);
-    setSelectedNode(null);
-  }, [setSidebarOpen, setSelectedNode]);
+    closeSidebar()
+  }, [closeSidebar])
 
   return (
     <AnimatePresence>
@@ -35,16 +33,14 @@ export const Sidebar: React.FC = () => {
             initial={{ x: 400, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: 400, opacity: 0 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="fixed right-0 top-0 h-screen w-96 bg-white shadow-2xl z-40 flex flex-col overflow-hidden"
           >
             {/* Header */}
             <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white p-6 flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-bold">
-                  {selectedNode.type === "conversation"
-                    ? "Message Node"
-                    : "Condition Node"}
+                  {selectedNode.type === 'conversation' ? 'Message Node' : 'Condition Node'}
                 </h2>
                 <p className="text-xs text-slate-300">ID: {selectedNode.id}</p>
               </div>
@@ -63,9 +59,7 @@ export const Sidebar: React.FC = () => {
               <div className="p-6 space-y-6">
                 {/* Form Editor */}
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-900 mb-4">
-                    Properties
-                  </h3>
+                  <h3 className="text-sm font-semibold text-slate-900 mb-4">Properties</h3>
                   <FormEditor node={selectedNode} />
                 </div>
 
@@ -74,16 +68,10 @@ export const Sidebar: React.FC = () => {
 
                 {/* Live Preview */}
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-900 mb-4">
-                    Preview
-                  </h3>
+                  <h3 className="text-sm font-semibold text-slate-900 mb-4">Preview</h3>
                   <LivePreview
                     node={selectedNode}
-                    nodeData={
-                      selectedNode.data as
-                        | ConversationNodeData
-                        | ConditionNodeData
-                    }
+                    nodeData={selectedNode.data as ConversationNodeData | ConditionNodeData}
                   />
                 </div>
               </div>
@@ -104,5 +92,5 @@ export const Sidebar: React.FC = () => {
         </>
       )}
     </AnimatePresence>
-  );
-};
+  )
+}

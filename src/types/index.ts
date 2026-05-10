@@ -1,44 +1,50 @@
-import { Node, Edge } from "reactflow";
+import { Node, Edge as ReactFlowEdge } from 'reactflow'
 
 export type ConversationNodeData = {
-  label: string;
-  message: string;
-  text: string;
-};
+  label: string
+  message: string
+  text: string
+}
 
 export type ConditionNodeData = {
-  operator: ">" | "<" | "==" | "!=";
-  compareValue: number;
-  value?: number;
-};
+  operator: '>' | '<' | '==' | '!='
+  compareValue: number
+  value?: number
+}
 
-export type NodeData = ConversationNodeData | ConditionNodeData;
+export type NodeData = ConversationNodeData | ConditionNodeData
 
 export interface ConversationNode extends Node<ConversationNodeData> {
-  type: "conversation";
+  type: 'conversation'
 }
 
 export interface ConditionNode extends Node<ConditionNodeData> {
-  type: "condition";
+  type: 'condition'
 }
 
-export type WorkflowNode = ConversationNode | ConditionNode | Node;
+export type WorkflowNode = ConversationNode | ConditionNode | Node
 
-export interface WorkflowEdge extends Edge {  sourceHandle?: string
-  targetHandle?: string  animated?: boolean;
-  style?: React.CSSProperties;
-  label?: string;
+export type WorkflowEdge = ReactFlowEdge & {
+  id: string
+  source: string
+  target: string
+  sourceHandle?: string | null
+  targetHandle?: string | null
+  type?: string
+  animated?: boolean
+  style?: React.CSSProperties
+  label?: string
 }
 
 export interface WorkflowState {
-  nodes: WorkflowNode[];
-  edges: WorkflowEdge[];
-  selectedNodeId: string | null;
-  sidebarOpen: boolean;
-  activeEdges: string[];
+  nodes: WorkflowNode[]
+  edges: WorkflowEdge[]
+  selectedNodeId: string | null
+  sidebarOpen: boolean
+  activeEdges: string[]
 }
 
 export interface EvaluationContext {
-  nodeId: string;
-  previousValue?: number | string | boolean;
+  nodeId: string
+  previousValue?: number | string | boolean
 }

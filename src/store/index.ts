@@ -11,8 +11,19 @@ interface WorkflowStore {
   addNode: (type: string, position: { x: number; y: number }) => void
   removeNode: (nodeId: string) => void
   updateNodeData: (nodeId: string, data: Partial<ConversationNodeData | ConditionNodeData>) => void
+
+  // Independent selection actions
+  selectNode: (nodeId: string) => void
+  deselectNode: () => void
+
+  // Independent sidebar actions
+  openSidebar: () => void
+  closeSidebar: () => void
+
+  // Legacy function for compatibility
   setSelectedNode: (nodeId: string | null) => void
   setSidebarOpen: (open: boolean) => void
+
   addEdge: (edge: WorkflowEdge) => void
   removeEdge: (edgeId: string) => void
   setEdges: (edges: WorkflowEdge[]) => void
@@ -59,11 +70,13 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   },
 
   removeNode: (nodeId: string) => {
-    const { nodes, edges } = get()
+    const { nodes, edges, selectedNodeId } = get()
+    // If the deleted node was selected, clear selection and close sidebar
+    const isDeletedNodeSelected = selectedNodeId === nodeId
     set({
       nodes: nodes.filter((n) => n.id !== nodeId),
       edges: edges.filter((e) => e.source !== nodeId && e.target !== nodeId),
-      selectedNodeId: null,
+      selectedNodeId: isDeletedNodeSelected ? null : selectedNodeId,
       sidebarOpen: false,
     })
   },
@@ -77,13 +90,38 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     setTimeout(() => get().evaluateConditions(), 0)
   },
 
-  setSelectedNode: (nodeId: string | null) => {
+  // Select a node and open the sidebar
+  selectNode: (nodeId: string) => {
     set({
       selectedNodeId: nodeId,
-      sidebarOpen: !!nodeId,
+      sidebarOpen: true,
     })
   },
 
+  // Deselect the current node and close sidebar
+  deselectNode: () => {
+    set({
+      selectedNodeId: null,
+      sidebarOpen: false,
+    })
+  },
+
+  // Open sidebar independently of selection
+  openSidebar: () => {
+    set({ sidebarOpen: true })
+  },
+
+  // Close sidebar independently of selection
+  closeSidebar: () => {
+    set({ sidebarOpen: false })
+  },
+
+  // Legacy function - now only changes selectedNodeId, doesn't affect sidebar
+  setSelectedNode: (nodeId: string | null) => {
+    set({ selectedNodeId: nodeId })
+  },
+
+  // Legacy function - directly controls sidebar visibility
   setSidebarOpen: (open: boolean) => {
     set({ sidebarOpen: open })
   },
@@ -124,9 +162,9 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
           const sourceNode = nodes.find((n) => n.id === incomingEdge.source)
           let nodeValue = value
 
-          if (sourceNode && sourceNode.type === 'conversation') {
+          if (sourceNode?.type === 'conversation') {
             const conversationData = sourceNode.data as ConversationNodeData
-            nodeValue = parseInt(conversationData.text) || 0
+            nodeValue = Number.parseInt(conversationData.text) || 0
           }
 
           // Evaluate the condition

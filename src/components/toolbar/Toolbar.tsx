@@ -1,7 +1,6 @@
 import React, { useCallback } from "react";
 import { motion } from "framer-motion";
 import {
-  Plus,
   MessageCircle,
   GitBranch,
   Trash2,
